@@ -1,6 +1,6 @@
 {
   "name": "oxen-queue-v2",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "A resilient worker queue backed by MySQL.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "mysql2": "^3.12.0"
+    "mysql2": "3.12.0"
   },
   "scripts": {
     "build": "tsc",

@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import {isUndefined, isNumber} from 'lodash';
+import { isUndefined, isNumber } from 'lodash';
 import mysql from 'mysql2/promise';
 
 import * as storage from './storage';
@@ -292,11 +292,11 @@ export class Queue<T = any> {
         WHERE batch_id IS NULL 
         AND STATUS = "waiting" 
         AND ? 
-        AND created_ts <= NOW()
+        AND created_ts <= ${nowSql()}
         ORDER BY priority ASC LIMIT ${this.batchSize}
       ) sub
       ON sub.id = main.id
-      SET ?, STATUS = "processing", started_ts = NOW()`,
+      SET ?, STATUS = "processing", started_ts = ${nowSql()}`,
       [{ job_type: this.jobType }, { batch_id: batchId }]
     );
 
@@ -330,7 +330,7 @@ export class Queue<T = any> {
         ?, 
         unique_key = NULL,
         status="success",
-        running_time = TIMESTAMPDIFF(SECOND,started_ts,NOW())  
+        running_time = TIMESTAMPDIFF(SECOND,started_ts,${nowSql()})  
       WHERE ? 
       LIMIT 1`,
       [
@@ -377,7 +377,7 @@ export class Queue<T = any> {
         ?, 
         unique_key = NULL,
         status="error", 
-        running_time = TIMESTAMPDIFF(SECOND,started_ts,NOW()) 
+        running_time = TIMESTAMPDIFF(SECOND,started_ts,${nowSql()}) 
       WHERE ? 
       LIMIT 1`,
       [
@@ -403,7 +403,7 @@ export class Queue<T = any> {
         recovered = 1 
       WHERE 
         STATUS="processing" AND 
-        started_ts < (NOW() - INTERVAL ${this.jobTimeoutSeconds} SECOND) AND
+        started_ts < (${nowSql()} - INTERVAL ${this.jobTimeoutSeconds} SECOND) AND
         ?
       `,
       { job_type: this.jobType }
@@ -421,7 +421,7 @@ export class Queue<T = any> {
         recovered = 1 
       WHERE 
         STATUS="processing" AND 
-        started_ts < (NOW() - INTERVAL ${this.jobTimeoutSeconds} SECOND) AND
+        started_ts < (${nowSql()} - INTERVAL ${this.jobTimeoutSeconds} SECOND) AND
         ?
       `,
       { job_type: this.jobType }
@@ -479,8 +479,14 @@ export class Queue<T = any> {
   }
 
   private log(msg: any, notError?: boolean): void {
+    console.log(msg)
     console[notError ? 'log' : 'error'](`Oxen Queue: ${msg}`);
   }
+}
+
+function nowSql(): string {
+  const timezone = process.env.TZ ?? 'UTC';
+  return `CONVERT_TZ(NOW(), 'UTC', '${timezone}')`
 }
 
 export { errorMessages };
