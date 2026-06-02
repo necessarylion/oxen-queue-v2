@@ -47,7 +47,19 @@ npm install oxen-queue-v2
 
 ## TypeScript Support
 
-This package is written in TypeScript and includes full type definitions. You can import it in TypeScript projects:
+This package is written in TypeScript and includes full type definitions. It ships a dual build, so it works as both an **ES Module** (`import`) and a **CommonJS** module (`require`) on Node 14+ (including Node 24):
+
+```typescript
+// ESM / TypeScript
+import { Queue, QueueConfig, Job } from 'oxen-queue-v2';
+```
+
+```javascript
+// CommonJS
+const { Queue } = require('oxen-queue-v2');
+```
+
+You can import it in TypeScript projects:
 
 ```typescript
 import { Queue, QueueConfig, Job } from 'oxen-queue-v2';
@@ -320,6 +332,61 @@ Because you can index them! In our previous example, if you add an indexes to `u
 ```
 
 This is where using an SQL-backed queue can really help debug tricky errors.
+
+## Development & Publishing
+
+### Building
+
+The project is written in TypeScript and compiled into a dual CommonJS + ESM build under `dist/`:
+
+```bash
+npm install        # install dependencies
+npm run build      # clean + build both CJS and ESM into dist/
+```
+
+`npm run build` runs three steps:
+
+| Script             | Output           | Description                                   |
+| ------------------ | ---------------- | --------------------------------------------- |
+| `npm run build:cjs`| `dist/cjs/`      | CommonJS build (`tsconfig.cjs.json`)          |
+| `npm run build:esm`| `dist/esm/`      | ES Module build (`tsconfig.esm.json`)         |
+| `node scripts/fixup.js` | `dist/*/package.json` | Writes per-folder `type` markers so Node loads each build correctly |
+
+For an incremental rebuild while developing, use the watcher:
+
+```bash
+npm run dev        # tsc --watch (CommonJS output)
+```
+
+### Publishing to npm
+
+1. Make sure you are logged in to npm and have publish access to the package:
+
+   ```bash
+   npm whoami        # confirm you're logged in (npm login if not)
+   ```
+
+2. Bump the version (this creates a commit and a git tag):
+
+   ```bash
+   npm version patch   # or: minor / major
+   ```
+
+3. Publish. The `prepublishOnly` hook automatically runs `npm run build`, so the freshly compiled `dist/` is what gets published:
+
+   ```bash
+   npm publish
+   ```
+
+   > The published tarball only includes `dist/`, `README.md`, and `LICENSE` (see the `files` field in `package.json`).
+
+4. Push the version commit and tag to the repository:
+
+   ```bash
+   git push --follow-tags
+   ```
+
+To preview exactly what will be published without uploading anything, run `npm publish --dry-run` or `npm pack`.
 
 ## Authors
 

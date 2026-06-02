@@ -1,2 +1,2 @@
-export { Queue, errorMessages } from './lib/queue';
-export * from './types';
+export { Queue, errorMessages } from './lib/queue.js';
+export * from './types.js';

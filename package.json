@@ -1,9 +1,19 @@
 {
   "name": "oxen-queue-v2",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "A resilient worker queue backed by MySQL.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/cjs/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "engines": {
     "node": ">=14.0.0"
   },
@@ -25,8 +35,11 @@
     "mysql2": "3.12.0"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && node scripts/fixup.js",
+    "dev": "tsc -p tsconfig.cjs.json --watch",
     "test": "mocha test/ --timeout 6000 --exit",
     "prepublishOnly": "npm run build"
   },

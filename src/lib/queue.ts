@@ -1,8 +1,9 @@
 import * as crypto from 'crypto';
-import { isUndefined, isNumber } from 'lodash';
+import isUndefined from 'lodash/isUndefined.js';
+import isNumber from 'lodash/isNumber.js';
 import mysql from 'mysql2/promise';
 
-import * as storage from './storage';
+import * as storage from './storage.js';
 import {
   QueueConfig,
   ProcessConfig,
@@ -14,7 +15,7 @@ import {
   Job,
   JobResult,
   JobError
-} from '../types';
+} from '../types.js';
 
 const errorMessages = {
   noJobType:
